@@ -1075,8 +1075,14 @@ class LaxBackedNumpyTests(jtu.JaxTestCase):
     rng = rng_factory(self.rng())
     irng = irng_factory(self.rng())
     pad_width = irng([len(shape), 2][2 - pad_width_rank:], np.int32)
+    if pad_width.ndim == 2:
+      pad_width = tuple(map(tuple, pad_width))
+    elif pad_width.ndim == 1:
+      pad_width = tuple(pad_width)
+    else:
+      pad_width = pad_width.item()
     def np_fun(x, kwargs):
-      if pad_width.size == 0:
+      if np.size(pad_width) == 0:
         return x
       return np.pad(x, pad_width, mode=mode, **kwargs)
     def jnp_fun(x, kwargs):
@@ -3256,6 +3262,7 @@ class LaxBackedNumpyTests(jtu.JaxTestCase):
 
   def testIssue883(self):
     # from https://github.com/google/jax/issues/883
+    raise SkipTest("we decided to disallow arrays as static args")
 
     @partial(api.jit, static_argnums=(1,))
     def f(x, v):

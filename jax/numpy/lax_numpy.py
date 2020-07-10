@@ -29,7 +29,7 @@ import collections
 import operator
 import os
 import types
-from typing import Sequence, Set, Tuple, Union
+from typing import Sequence, FrozenSet, Tuple, Union
 import warnings
 
 import numpy as np
@@ -2851,7 +2851,7 @@ def einsum(*operands, **kwargs):
   # using einsum_call=True here is an internal api for opt_einsum
   operands, contractions = opt_einsum.contract_path(
       *operands, einsum_call=True, use_blas=True, optimize=optimize)
-  contractions = tuple(data[:3] for data in contractions)
+  contractions = tuple((a, frozenset(b), c) for a, b, c, *_ in contractions)
   return _einsum(operands, contractions, precision)
 
 @_wraps(np.einsum_path)
@@ -2865,7 +2865,7 @@ def _removechars(s, chars):
 
 @partial(jit, static_argnums=(1, 2))
 def _einsum(operands: Sequence,
-            contractions: Sequence[Tuple[Tuple[int, ...], Set[str], str]],
+            contractions: Sequence[Tuple[Tuple[int, ...], FrozenSet[str], str]],
             precision):
   operands = list(_promote_dtypes(*operands))
   def sum(x, axes):
@@ -3198,6 +3198,8 @@ def _roll(a, shift, axis):
 
 @_wraps(np.roll)
 def roll(a, shift, axis=None):
+  if isinstance(axis, list):
+    axis = tuple(axis)
   return _roll(a, shift, axis)
 
 
