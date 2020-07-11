@@ -79,7 +79,7 @@ def argnums_partial(f, dyn_argnums, args):
     dyn_argnums = (dyn_argnums,)
   else:
     dyn_argnums = tuple(dyn_argnums)
-  fixed_args = tuple([unit if i in dyn_argnums else arg
+  fixed_args = tuple([unit if i in dyn_argnums else wrap_hashably(arg)
                       for i, arg in enumerate(args)])
   dyn_args = tuple(args[i] for i in dyn_argnums)
   return _argnums_partial(f, dyn_argnums, fixed_args), dyn_args
@@ -137,7 +137,7 @@ def wrap_hashably(arg):
 
 @lu.transformation
 def _argnums_partial(dyn_argnums, fixed_args, *dyn_args, **kwargs):
-  args = [None if arg is unit else arg for arg in fixed_args]
+  args = [None if arg is unit else arg.val for arg in fixed_args]
   for i, arg in zip(dyn_argnums, dyn_args):
     args[i] = arg
   ans = yield args, kwargs
