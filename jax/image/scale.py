@@ -200,4 +200,4 @@ def resize(image, shape: Sequence[int], method: Union[str, ResizeMethod],
   Returns:
     The resized image.
   """
-  return _resize(image, shape, method, antialias)
+  return _resize(image, tuple(shape), method, antialias)
