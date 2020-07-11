@@ -1967,7 +1967,34 @@ def _pad_edge(array, pad_width):
 def _pad(array, pad_width, mode, constant_values):
   array = asarray(array)
   nd = ndim(array)
-  pad_width = np.broadcast_to(np.asarray(pad_width), (nd, 2))
+
+  if nd == 0:
+    return array
+
+  pad_width_shape = np.shape(pad_width)
+  if pad_width_shape == (nd, 2):
+    # ((before_1, after_1), ..., (before_N, after_N))
+    pass
+  elif pad_width_shape == (1, 2):
+    # ((before, after),)
+    pad_width = pad_width * nd
+  elif pad_width_shape == (2,):
+    # (before, after)  (not in the numpy docstring but works anyway)
+    before, after = pad_width
+    pad_width = (pad_width,) * nd
+  elif pad_width_shape == (1,):
+    # (pad,)
+    pad_width, = pad_width
+    pad_width = ((pad_width, pad_width),) * nd
+  elif pad_width_shape == ():
+    # pad
+    pad_width = ((pad_width, pad_width),) * nd
+  else:
+    raise ValueError(f"pad_width given unexpected structure: {pad_width}. "
+                     "See docstring for valid pad_width formats.")
+  pad_width = np.array(pad_width)
+  assert pad_width.shape == (nd, 2), pad_width
+
   if np.any(pad_width < 0):
     raise ValueError("index can't contain negative values")
 
