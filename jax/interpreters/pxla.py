@@ -594,12 +594,18 @@ class ShardedDeviceArray(xla.DeviceArray):
     return self._npy_value
 
   def __getitem__(self, idx):
-    if self._npy_value is None and idx in self.indices:
+    if idx in self.indices:
       buf = self.device_buffers[self.indices.index(idx)]
       aval = ShapedArray(buf.shape().dimensions(), self.aval.dtype)
       return xla.DeviceArray(aval, None, lazy.array(aval.shape), buf)
     else:
       return super(ShardedDeviceArray, self).__getitem__(idx)
+
+  def __iter__(self):
+    if self.ndim == 0:
+      raise TypeError("iteration over a 0-d array")  # same as numpy error
+    else:
+      return (self[i] for i in range(self.shape[0]))
 
 
 def _hashable_index(idx):
