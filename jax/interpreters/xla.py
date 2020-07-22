@@ -1075,7 +1075,8 @@ class DeviceArray(DeviceValue):
     if self.ndim == 0:
       raise TypeError("iteration over a 0-d array")  # same as numpy error
     else:
-      if self.device_buffer.device().platform == 'cpu':
+      device = self.device_buffer.device()
+      if device is None or device.platform == 'cpu':
         return iter(self._value)
       else:
         return (sl for chunk in self._chunk_iter(100) for sl in chunk._unstack())
