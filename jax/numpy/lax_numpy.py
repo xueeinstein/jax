@@ -4485,11 +4485,14 @@ def _unstack(x):
   return [lax.index_in_dim(x, i, keepdims=False) for i in range(x.shape[0])]
 setattr(DeviceArray, "_unstack", _unstack)
 def _chunk_iter(x, size):
-  num_chunks, tail = divmod(x.shape[0], size)
-  for i in range(x.shape[0] // size):
-    yield lax.slice_in_dim(x, i * size, (i + 1) * size)
-  if tail:
-    yield lax.slice_in_dim(x, num_chunks * size, x.shape[0])
+  if size > x.shape[0]:
+    yield x
+  else:
+    num_chunks, tail = divmod(x.shape[0], size)
+    for i in range(num_chunks):
+      yield lax.dynamic_slice_in_dim(x, i * size, size)
+    if tail:
+      yield lax.dynamic_slice_in_dim(x, num_chunks * size, tail)
 setattr(DeviceArray, "_chunk_iter", _chunk_iter)
 
 # Syntactic sugar for scatter operations.
