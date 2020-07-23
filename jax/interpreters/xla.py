@@ -1082,10 +1082,7 @@ class DeviceArray(DeviceValue):
         return (sl for chunk in self._chunk_iter(100) for sl in chunk._unstack())
 
   def __reversed__(self):
-    if self.ndim == 0:
-      raise TypeError("iteration over a 0-d array")
-    else:
-      return reversed(self._value)
+    return iter(self[::-1])
 
   def __format__(self, format_spec):
     # Simulates behavior of https://github.com/numpy/numpy/pull/9883

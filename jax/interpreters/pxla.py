@@ -607,6 +607,12 @@ class ShardedDeviceArray(xla.DeviceArray):
     else:
       return (self[i] for i in range(self.shape[0]))
 
+  def __reversed__(self):
+    if self.ndim == 0:
+      raise TypeError("iteration over a 0-d array")  # same as numpy error
+    else:
+      return (self[i] for i in range(self.shape[0] - 1, -1, -1))
+
 
 def _hashable_index(idx):
   return tree_map(lambda x: (x.start, x.stop) if type(x) == slice else x,
