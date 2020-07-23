@@ -5763,12 +5763,17 @@ def _const(example, val):
     return dtypes.scalar_type_of(example)(val)
   return np.array(val, _dtype(example))
 
+def _zero(x): return _scalar(_dtype(x), 0)
+def _one(x): return _scalar(_dtype(x), 1)
+def _two(x): return _scalar(_dtype(x), 2)
+
+@cache()
+def _scalar(dtype, val):
+  return xla.device_put_p.bind(np.array(val, dtype))
+
 _zeros: Callable = partial(full_like, fill_value=0)
-_zero: Callable = partial(full_like, shape=(), fill_value=0)
 _ones: Callable = partial(full_like, fill_value=1)
-_one: Callable = partial(full_like, shape=(), fill_value=1)
 _twos: Callable = partial(full_like, fill_value=2)
-_two: Callable = partial(full_like, shape=(), fill_value=2)
 
 dtype: Callable = dtypes.result_type
 _dtype: Callable = dtypes.result_type
